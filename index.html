@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Bloxd.io Mobile Controller</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#06080f;
+  color:#fff;
+  font-family:'Share Tech Mono',monospace;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px 16px;
+  gap:0;
+}
+
+/* bg grid */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,255,200,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,200,0.04) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;
+}
+
+.logo{
+  font-family:'Orbitron',monospace;
+  font-size:22px;font-weight:900;
+  color:#00ffc8;
+  letter-spacing:0.18em;
+  text-shadow:0 0 30px rgba(0,255,200,0.5);
+  margin-bottom:6px;
+}
+.sub{
+  font-size:10px;letter-spacing:0.12em;
+  color:rgba(0,255,200,0.4);
+  margin-bottom:36px;
+}
+
+.card{
+  width:100%;max-width:440px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(0,255,200,0.15);
+  border-radius:14px;
+  padding:22px 20px;
+  margin-bottom:14px;
+}
+
+.step-num{
+  font-family:'Orbitron',monospace;
+  font-size:9px;letter-spacing:0.15em;
+  color:rgba(0,255,200,0.45);
+  margin-bottom:8px;
+}
+
+.step-title{
+  font-family:'Orbitron',monospace;
+  font-size:13px;font-weight:700;
+  color:#fff;
+  margin-bottom:10px;
+}
+
+.step-desc{
+  font-size:11px;line-height:1.7;
+  color:rgba(255,255,255,0.55);
+}
+
+/* THE BOOKMARKLET BUTTON */
+.bm-wrap{
+  margin:14px 0 8px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+
+#bm-link{
+  display:inline-flex;
+  align-items:center;gap:8px;
+  padding:14px 24px;
+  border-radius:10px;
+  background:linear-gradient(135deg,rgba(0,255,200,0.18),rgba(0,180,140,0.1));
+  border:1.5px solid rgba(0,255,200,0.45);
+  color:#00ffc8;
+  font-family:'Orbitron',monospace;
+  font-size:13px;font-weight:700;
+  letter-spacing:0.1em;
+  text-decoration:none;
+  box-shadow:0 0 30px rgba(0,255,200,0.15);
+  cursor:grab;
+  transition:box-shadow 0.2s,transform 0.1s;
+}
+#bm-link:active{transform:scale(0.97);}
+
+.bm-hint{
+  font-size:9.5px;
+  color:rgba(255,255,255,0.3);
+  letter-spacing:0.06em;
+  text-align:center;
+  line-height:1.6;
+}
+
+/* steps list */
+.steps{
+  list-style:none;
+  display:flex;flex-direction:column;gap:10px;
+}
+.steps li{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:11px;line-height:1.6;
+  color:rgba(255,255,255,0.55);
+}
+.steps li .n{
+  min-width:20px;height:20px;
+  border-radius:50%;
+  background:rgba(0,255,200,0.12);
+  border:1px solid rgba(0,255,200,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',monospace;
+  font-size:9px;color:#00ffc8;
+  margin-top:1px;flex-shrink:0;
+}
+.steps li b{color:rgba(255,255,255,0.85);}
+
+.badge{
+  display:inline-block;
+  background:rgba(0,255,200,0.1);
+  border:1px solid rgba(0,255,200,0.25);
+  color:#00ffc8;
+  font-size:9px;letter-spacing:0.06em;
+  padding:2px 7px;border-radius:4px;
+}
+
+/* features grid */
+.feats{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:8px;margin-top:2px;
+}
+.feat{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:8px;
+  padding:10px 10px;
+  font-size:10px;line-height:1.5;
+  color:rgba(255,255,255,0.5);
+}
+.feat b{display:block;color:rgba(255,255,255,0.85);margin-bottom:2px;font-size:11px;}
+
+.warning{
+  width:100%;max-width:440px;
+  background:rgba(255,170,0,0.05);
+  border:1px solid rgba(255,170,0,0.2);
+  border-radius:10px;
+  padding:12px 16px;
+  font-size:10px;line-height:1.6;
+  color:rgba(255,200,80,0.7);
+  margin-bottom:14px;
+}
+.warning b{color:rgba(255,200,80,0.95);}
+
+/* copy fallback */
+#copy-area{
+  width:100%;
+  background:rgba(0,0,0,0.4);
+  border:1px solid rgba(0,255,200,0.15);
+  border-radius:8px;
+  padding:10px;
+  font-family:'Share Tech Mono',monospace;
+  font-size:9px;
+  color:rgba(0,255,200,0.6);
+  resize:none;
+  height:60px;
+  margin-top:8px;
+  word-break:break-all;
+}
+#copy-btn{
+  margin-top:8px;
+  padding:8px 16px;
+  border-radius:6px;
+  background:rgba(0,255,200,0.1);
+  border:1px solid rgba(0,255,200,0.3);
+  color:#00ffc8;
+  font-family:'Orbitron',monospace;
+  font-size:9px;letter-spacing:0.08em;
+  cursor:pointer;
+  width:100%;
+}
+#copy-btn:active{background:rgba(0,255,200,0.25);}
+#copy-msg{
+  text-align:center;font-size:10px;
+  color:rgba(0,255,200,0.6);
+  margin-top:6px;min-height:16px;
+}
+</style>
+</head>
+<body>
+
+<div class="logo">BLOXD CTRL</div>
+<div class="sub">MOBILE CONTROLLER — BOOKMARKLET</div>
+
+<!-- CARD 1: el bookmarklet -->
+<div class="card">
+  <div class="step-num">PASO 1 DE 2</div>
+  <div class="step-title">Guarda el botón en favoritos</div>
+  <div class="step-desc">
+    Mantén presionado el botón verde y selecciona <b>"Agregar a favoritos"</b> o <b>"Añadir marcador"</b>.
+  </div>
+  <div class="bm-wrap">
+    <a id="bm-link" href="#">🎮 BLOXD CTRL</a>
+    <div class="bm-hint">
+      Mantén presionado → "Agregar a favoritos"<br>
+      (No lo toques normal, hay que guardarlo)
+    </div>
+  </div>
+
+  <div class="step-desc" style="margin-top:12px;margin-bottom:8px;">
+    ¿No te deja guardarlo? Copia el código y pégalo manualmente:
+  </div>
+  <textarea id="copy-area" readonly></textarea>
+  <button id="copy-btn" onclick="copyCode()">📋 COPIAR CÓDIGO</button>
+  <div id="copy-msg"></div>
+</div>
+
+<!-- CARD 2: cómo usarlo -->
+<div class="card">
+  <div class="step-num">PASO 2 DE 2</div>
+  <div class="step-title">Úsalo en Bloxd.io</div>
+  <ul class="steps">
+    <li><div class="n">1</div><span>Entra a <b>bloxd.io</b> desde Chrome en tu celular</span></li>
+    <li><div class="n">2</div><span>Únete a un juego y espera que cargue</span></li>
+    <li><div class="n">3</div><span>Abre tus <b>favoritos</b> y toca <b>"🎮 BLOXD CTRL"</b></span></li>
+    <li><div class="n">4</div><span>¡Los controles aparecen directo en el juego! 🎉</span></li>
+  </ul>
+</div>
+
+<!-- warning -->
+<div class="warning">
+  <b>⚠ ¿Por qué funciona así?</b><br>
+  Bloxd.io bloquea iframes, por eso no se puede meter dentro de otra página.
+  El bookmarklet inyecta los controles <i>dentro</i> de bloxd.io directamente,
+  por eso no desaparecen.
+</div>
+
+<!-- features -->
+<div class="card">
+  <div class="step-num">INCLUYE</div>
+  <div class="feats">
+    <div class="feat"><b>🕹️ Joystick</b>Movimiento WASD</div>
+    <div class="feat"><b>📷 Cámara</b>Drag lado derecho</div>
+    <div class="feat"><b>⚔️ Atacar</b>Minar (mantén)</div>
+    <div class="feat"><b>🧱 Colocar</b>Bloque (mantén)</div>
+    <div class="feat"><b>↑ Saltar</b>Spacebar</div>
+    <div class="feat"><b>🏃 Sprint</b>Shift</div>
+    <div class="feat"><b>✋ Usar</b>Interactuar F</div>
+    <div class="feat"><b>⬇ Crouch</b>Agacharse C</div>
+    <div class="feat"><b>🎒 Hotbar</b>Slots 1–7</div>
+    <div class="feat"><b>🎯 Sens</b>Ajuste de cámara</div>
+    <div class="feat"><b>💬 Chat</b>Tecla T</div>
+    <div class="feat"><b>🗺 Mapa</b>Tecla M</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// THE CONTROLLER CODE (minified inline)
+// ═══════════════════════════════════════
+const CODE = `(function(){
+if(document.getElementById('_bmc'))return;
+var CSS=\`
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&display=swap');
+#_bmc{position:fixed;inset:0;z-index:2147483647;pointer-events:none;font-family:'Share Tech Mono',monospace}
+#_look{position:absolute;top:0;right:0;width:56%;height:calc(100% - 210px);pointer-events:all}
+#_hud{position:absolute;bottom:0;left:0;right:0;height:210px;background:linear-gradient(to top,rgba(4,6,14,.97) 55%,rgba(4,6,14,.75) 85%,transparent);border-top:1px solid rgba(0,255,200,.12);pointer-events:none}
+#_left{position:absolute;bottom:12px;left:12px;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+#_jb{width:128px;height:128px;border-radius:50%;background:radial-gradient(circle,rgba(0,255,200,.05),transparent 70%);border:1.5px solid rgba(0,255,200,.18);box-shadow:0 0 35px rgba(0,255,200,.06),inset 0 0 25px rgba(0,0,0,.7);position:relative;pointer-events:all}
+#_jk{width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 36% 30%,rgba(0,255,200,.95),rgba(0,150,110,.7) 55%,rgba(0,60,45,.5));box-shadow:0 0 22px rgba(0,255,200,.55),0 0 5px rgba(0,255,200,.9);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+#_spr{width:118px;height:27px;border-radius:6px;background:rgba(204,68,255,.1);border:1px solid rgba(204,68,255,.32);color:rgba(204,68,255,.9);font-family:'Orbitron',monospace;font-size:8px;font-weight:700;letter-spacing:.1em;display:flex;align-items:center;justify-content:center;pointer-events:all}
+._p{transform:scale(.87)!important}
+#_ctr{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:none}
+#_hb{display:flex;gap:4px;pointer-events:all}
+.hs{width:36px;height:36px;border-radius:6px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:15px;color:rgba(255,255,255,.5);transition:all .07s}
+.hs .n{font-family:'Share Tech Mono',monospace;font-size:6.5px;color:rgba(255,255,255,.22);line-height:1}
+.hs.ac{border-color:#00ffc8;box-shadow:0 0 10px rgba(0,255,200,.38);color:#fff}
+#_ut{display:flex;gap:5px;pointer-events:all}
+.ut{height:25px;padding:0 8px;border-radius:5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.45);font-family:'Share Tech Mono',monospace;font-size:8.5px;display:flex;align-items:center;gap:3px}
+#_right{position:absolute;bottom:10px;right:10px;display:flex;flex-direction:column;align-items:flex-end;gap:9px;pointer-events:none}
+#_ta,#_ba{display:flex;gap:8px;align-items:flex-end;pointer-events:all}
+.ab{border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-family:'Orbitron',monospace;font-weight:900;transition:transform .07s,box-shadow .07s;border:1.5px solid transparent}
+.ab .i{font-size:19px;line-height:1}
+.ab .l{font-size:6.5px;letter-spacing:.05em;opacity:.75;color:#fff}
+#_jump{width:76px;height:76px;background:radial-gradient(circle at 36% 30%,#00d4ff,#0066cc 58%,#00264d);border-color:rgba(0,200,255,.35);box-shadow:0 0 26px rgba(0,170,255,.4),0 4px 14px rgba(0,0,0,.55);color:#fff}
+#_jump .i{font-size:26px}
+#_atk{width:60px;height:60px;background:radial-gradient(circle at 36% 30%,#ff5555,#bb1111 58%,#550000);border-color:rgba(255,70,70,.35);box-shadow:0 0 20px rgba(255,50,50,.38),0 4px 10px rgba(0,0,0,.55);color:#fff}
+#_plc{width:60px;height:60px;background:radial-gradient(circle at 36% 30%,#ffcc00,#cc7700 58%,#553300);border-color:rgba(255,175,0,.35);box-shadow:0 0 20px rgba(255,170,0,.38),0 4px 10px rgba(0,0,0,.55);color:#fff}
+#_use{width:48px;height:48px;background:radial-gradient(circle at 36% 30%,#66ff99,#22aa55 58%,#0d4422);border-color:rgba(68,255,136,.35);box-shadow:0 0 17px rgba(68,255,136,.32),0 4px 9px rgba(0,0,0,.55);color:#fff}
+#_cro{width:48px;height:48px;background:radial-gradient(circle at 36% 30%,#88aaff,#3355cc 58%,#111e55);border-color:rgba(80,120,255,.35);box-shadow:0 0 17px rgba(80,120,255,.32),0 4px 9px rgba(0,0,0,.55);color:#fff}
+#_top{position:absolute;top:0;left:0;right:0;height:42px;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;gap:6px;pointer-events:none;background:linear-gradient(to bottom,rgba(4,6,14,.85),transparent)}
+.tb{height:28px;padding:0 9px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.11);color:rgba(255,255,255,.65);font-family:'Share Tech Mono',monospace;font-size:8.5px;letter-spacing:.04em;display:flex;align-items:center;gap:3px;pointer-events:all;cursor:pointer}
+#_sp{position:absolute;top:46px;right:10px;background:rgba(4,6,14,.96);border:1px solid rgba(0,255,200,.2);border-radius:10px;padding:10px 14px;display:none;flex-direction:column;gap:8px;min-width:165px;pointer-events:all}
+#_sp.on{display:flex}
+.sr{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sr label{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(0,255,200,.7);letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.sr input{width:78px;accent-color:#00ffc8}
+.sr span{font-family:'Share Tech Mono',monospace;font-size:10px;color:#00ffc8;width:20px;text-align:right}
+#_ki{position:absolute;top:46px;left:10px;display:flex;gap:3px;pointer-events:none}
+.ki{width:21px;height:21px;border-radius:4px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:7.5px;color:rgba(255,255,255,.18);transition:all .08s}
+.ki.on{background:rgba(0,255,200,.18);border-color:rgba(0,255,200,.5);color:#00ffc8;box-shadow:0 0 6px rgba(0,255,200,.38)}
+\`;
+var s=document.createElement('style');s.textContent=CSS;document.head.appendChild(s);
+var r=document.createElement('div');r.id='_bmc';
+r.innerHTML='<div id="_look"></div><div id="_hud"></div><div id="_top"><button class="tb" id="_bs">⚙ SENS</button><button class="tb" id="_bh">👁 OCULTAR</button></div><div id="_sp"><div class="sr"><label>Horiz</label><input type="range" id="_sx" min="1" max="30" value="10"><span id="_sxv">10</span></div><div class="sr"><label>Vert</label><input type="range" id="_sy" min="1" max="30" value="10"><span id="_syv">10</span></div></div><div id="_ki"><div class="ki" id="_kw">W</div><div class="ki" id="_ka">A</div><div class="ki" id="_ks">S</div><div class="ki" id="_kd">D</div><div class="ki" id="_ksp">▲</div><div class="ki" id="_ksh">⇧</div></div><div id="_left"><div id="_jb"><div id="_jk"></div></div><div class="ab" id="_spr" style="border-radius:6px;width:118px;height:27px;">🏃 SPRINT·SHIFT</div></div><div id="_ctr"><div id="_hb"><div class="hs ac" data-c="Digit1">🪓<span class="n">1</span></div><div class="hs" data-c="Digit2">⛏<span class="n">2</span></div><div class="hs" data-c="Digit3">🗡<span class="n">3</span></div><div class="hs" data-c="Digit4">🧱<span class="n">4</span></div><div class="hs" data-c="Digit5">💣<span class="n">5</span></div><div class="hs" data-c="Digit6">🍖<span class="n">6</span></div><div class="hs" data-c="Digit7">🎯<span class="n">7</span></div></div><div id="_ut"><div class="ut" id="_ud">⬇ DROP·Q</div><div class="ut" id="_ui">🎒 INV·E</div><div class="ut" id="_uc">💬 CHAT·T</div><div class="ut" id="_um">🗺 MAP·M</div></div></div><div id="_right"><div id="_ta"><div class="ab" id="_cro"><div class="i">⬇</div><div class="l">CROUCH·C</div></div><div class="ab" id="_use"><div class="i">✋</div><div class="l">USO·F</div></div><div class="ab" id="_jump"><div class="i">↑</div><div class="l">SALTAR</div></div></div><div id="_ba"><div class="ab" id="_atk"><div class="i">⚔️</div><div class="l">ATACAR</div></div><div class="ab" id="_plc"><div class="i">🧱</div><div class="l">COLOCAR</div></div></div></div>';
+document.body.appendChild(r);
+var sx=10,sy=10,pk=new Set(),asl=0,hud=true;
+var CK={KeyW:'w',KeyA:'a',KeyS:'s',KeyD:'d',Space:' ',ShiftLeft:'Shift',KeyE:'e',KeyF:'f',KeyQ:'q',KeyT:'t',KeyM:'m',KeyC:'c',Digit1:'1',Digit2:'2',Digit3:'3',Digit4:'4',Digit5:'5',Digit6:'6',Digit7:'7'};
+var KC={KeyW:87,KeyA:65,KeyS:83,KeyD:68,Space:32,ShiftLeft:16,KeyE:69,KeyF:70,KeyQ:81,KeyT:84,KeyM:77,KeyC:67,Digit1:49,Digit2:50,Digit3:51,Digit4:52,Digit5:53,Digit6:54,Digit7:55};
+function fk(c,t){var k=CK[c]||c,kc=KC[c]||0,o={code:c,key:k,keyCode:kc,which:kc,bubbles:true,cancelable:true,composed:true};var cv=document.querySelector('canvas');[cv,document.activeElement,document.body,document,window].filter(Boolean).forEach(function(x){try{x.dispatchEvent(new KeyboardEvent(t,o))}catch(e){}});}
+function pk2(c){if(pk.has(c))return;pk.add(c);fk(c,'keydown');ki();}
+function rk(c){if(!pk.has(c))return;pk.delete(c);fk(c,'keyup');ki();}
+function tk(c){pk2(c);setTimeout(function(){rk(c)},90);}
+function ki(){var m={'_kw':'KeyW','_ka':'KeyA','_ks':'KeyS','_kd':'KeyD','_ksp':'Space','_ksh':'ShiftLeft'};for(var id in m){var el=document.getElementById(id);if(el)el.classList.toggle('on',pk.has(m[id]));}}
+function fm(t,b,dx,dy){b=b||0;dx=dx||0;dy=dy||0;var cx=window.innerWidth/2,cy=window.innerHeight/2,o={bubbles:true,cancelable:true,composed:true,button:b,buttons:b===0?1:2,clientX:cx+dx,clientY:cy+dy,screenX:cx+dx,screenY:cy+dy,movementX:dx,movementY:dy};var cv=document.querySelector('canvas');[cv,document.activeElement,document.body,document,window].filter(Boolean).forEach(function(x){try{x.dispatchEvent(new MouseEvent(t,o))}catch(e){}});}
+var jb=document.getElementById('_jb'),jk=document.getElementById('_jk'),JR=40,ja=false,jc={x:0,y:0},jnx=0,jny=0,jlp=null;
+jb.addEventListener('touchstart',function(e){e.stopPropagation();ja=true;var rc=jb.getBoundingClientRect();jc={x:rc.left+rc.width/2,y:rc.top+rc.height/2};mj(e.changedTouches[0]);if(!jlp)jlp=setInterval(aj,30);},{passive:true});
+jb.addEventListener('touchmove',function(e){e.stopPropagation();if(ja)mj(e.changedTouches[0]);},{passive:true});
+jb.addEventListener('touchend',function(){ja=false;jnx=0;jny=0;jk.style.transform='translate(-50%,-50%)';['KeyW','KeyA','KeyS','KeyD'].forEach(rk);if(jlp){clearInterval(jlp);jlp=null;}},{passive:true});
+function mj(t){var dx=t.clientX-jc.x,dy=t.clientY-jc.y,d=Math.hypot(dx,dy);if(d>JR){dx*=JR/d;dy*=JR/d;}jk.style.transform='translate(calc(-50% + '+dx+'px),calc(-50% + '+dy+'px))';jnx=dx/JR;jny=dy/JR;}
+function aj(){var h=0.22;jnx<-h?pk2('KeyA'):rk('KeyA');jnx>h?pk2('KeyD'):rk('KeyD');jny<-h?pk2('KeyW'):rk('KeyW');jny>h?pk2('KeyS'):rk('KeyS');}
+var lz=document.getElementById('_look'),lid=null,ll={x:0,y:0},pdx=0,pdy=0;
+lz.addEventListener('touchstart',function(e){if(lid!==null)return;var t=e.changedTouches[0];lid=t.identifier;ll={x:t.clientX,y:t.clientY};try{document.querySelector('canvas').focus();}catch(e){}},{passive:true});
+lz.addEventListener('touchmove',function(e){for(var i=0;i<e.changedTouches.length;i++){var t=e.changedTouches[i];if(t.identifier!==lid)continue;pdx+=t.clientX-ll.x;pdy+=t.clientY-ll.y;ll={x:t.clientX,y:t.clientY};}},{passive:true});
+lz.addEventListener('touchend',function(e){for(var i=0;i<e.changedTouches.length;i++){if(e.changedTouches[i].identifier===lid)lid=null;}},{passive:true});
+setInterval(function(){if(Math.abs(pdx)<0.4&&Math.abs(pdy)<0.4)return;fm('mousemove',0,pdx*sx*0.6,pdy*sy*0.6);pdx=0;pdy=0;},16);
+function btn(id,od,ou){var el=document.getElementById(id);if(!el)return;el.addEventListener('touchstart',function(e){e.stopPropagation();el.classList.add('_p');od&&od();},{passive:true});var up=function(e){e.stopPropagation();el.classList.remove('_p');ou&&ou();};el.addEventListener('touchend',up,{passive:true});el.addEventListener('touchcancel',up,{passive:true});}
+btn('_jump',function(){pk2('Space');},function(){rk('Space');});
+var ai=null;btn('_atk',function(){fm('mousedown',0);ai=setInterval(function(){fm('click',0);},180);},function(){fm('mouseup',0);clearInterval(ai);});
+var pi=null;btn('_plc',function(){fm('mousedown',2);pi=setInterval(function(){fm('mouseup',2);fm('mousedown',2);},220);},function(){fm('mouseup',2);clearInterval(pi);});
+btn('_use',function(){pk2('KeyF');},function(){rk('KeyF');});
+btn('_cro',function(){pk2('KeyC');},function(){rk('KeyC');});
+btn('_spr',function(){pk2('ShiftLeft');},function(){rk('ShiftLeft');});
+btn('_ud',function(){tk('KeyQ');});btn('_ui',function(){tk('KeyE');});btn('_uc',function(){tk('KeyT');});btn('_um',function(){tk('KeyM');});
+var slots=document.querySelectorAll('.hs');slots.forEach(function(el,i){el.addEventListener('touchstart',function(e){e.stopPropagation();el.classList.add('_p');slots.forEach(function(s,j){s.classList.toggle('ac',i===j);});asl=i;tk(el.dataset.c);},{passive:true});el.addEventListener('touchend',function(e){e.stopPropagation();el.classList.remove('_p');},{passive:true});});
+var ss=null;document.getElementById('_hb').addEventListener('touchstart',function(e){ss={x:e.changedTouches[0].clientX,s:asl};},{passive:true});document.getElementById('_hb').addEventListener('touchmove',function(e){if(!ss)return;var dx=e.changedTouches[0].clientX-ss.x,ns=Math.max(0,Math.min(6,ss.s-Math.round(dx/38)));if(ns!==asl){slots.forEach(function(s,j){s.classList.toggle('ac',ns===j);});asl=ns;tk(slots[ns].dataset.c);}},{passive:true});
+function sl(id,vid,fn){var el=document.getElementById(id);el.addEventListener('input',function(){fn(+el.value);document.getElementById(vid).textContent=el.value;});el.addEventListener('touchstart',function(e){e.stopPropagation();},{passive:true});el.addEventListener('touchmove',function(e){e.stopPropagation();},{passive:true});}
+sl('_sx','_sxv',function(v){sx=v;});sl('_sy','_syv',function(v){sy=v;});
+document.getElementById('_bs').addEventListener('touchstart',function(e){e.stopPropagation();document.getElementById('_sp').classList.toggle('on');},{passive:true});
+document.getElementById('_bh').addEventListener('touchstart',function(e){e.stopPropagation();hud=!hud;['_hud','_left','_ctr','_right','_ki','_look'].forEach(function(id){var el=document.getElementById(id);el.style.opacity=hud?'':'0';el.style.pointerEvents=hud?'':'none';});e.currentTarget.textContent=hud?'👁 OCULTAR':'👁 MOSTRAR';},{passive:true});
+document.addEventListener('touchstart',function(){try{document.querySelector('canvas').focus();}catch(e){}},{passive:true});
+new MutationObserver(function(){if(!document.contains(r))document.body.appendChild(r);}).observe(document.body,{childList:true});
+})();`;
+
+// Set the bookmarklet href
+const bm = 'javascript:' + encodeURIComponent(CODE);
+document.getElementById('bm-link').href = bm;
+document.getElementById('copy-area').value = bm;
+
+function copyCode() {
+  const ta = document.getElementById('copy-area');
+  ta.select();
+  ta.setSelectionRange(0, 99999);
+  try {
+    navigator.clipboard.writeText(ta.value).then(() => {
+      document.getElementById('copy-msg').textContent = '✓ Copiado — pégalo como URL en un favorito';
+    });
+  } catch(e) {
+    document.execCommand('copy');
+    document.getElementById('copy-msg').textContent = '✓ Copiado';
+  }
+}
+</script>
+</body>
+</html>
